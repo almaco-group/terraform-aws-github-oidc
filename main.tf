@@ -27,7 +27,10 @@ locals {
   default_allow_all = contains(var.default_conditions, "allow_all") ? [{
     test     = "StringLike"
     variable = local.variable_sub
-    values   = ["repo:${var.repo}:*"]
+    values   = [
+      for repo in var.repositories :
+        "repo:%{if length(regexall(":+", repo)) > 0}${repo}%{else}${repo}:*%{endif}"
+    ]
   }] : []
 
   default_deny_pull_request = contains(var.default_conditions, "deny_pull_request") ? [{
